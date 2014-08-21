@@ -4,22 +4,20 @@ pkgname=z-way
 pkgver=1.7.2
 pkgrel=1
 pkgdesc="Z-Way communication stack"
-arch=('armv6')
+arch=('armv6h')
 url="http://razberry.z-wave.me"
 license=('http://razberry.z-wave.me/docs/ZWAYEULA.pdf')
-depends=('v8','libarchive','libxml2','openssl','yajl','curl','zlib','sharutils','logrotate')
+depends=('v8' 'libarchive' 'libxml2' 'openssl' 'yajl' 'curl'
+         'zlib' 'sharutils' 'logrotate')
 install=${pkgname}.install
 source=("http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v1.7.2.tgz"
-        "http://razberry.z-wave.me/webif_raspberry.tar.gz","z-way.service","z-way-server.logrotate")
+        "http://razberry.z-wave.me/webif_raspberry.tar.gz" "z-way.service" "z-way-server.logrotate")
 
 md5sums=('cf19954c94271ea0206fe1b28120262e'
          'e930662d01287a9f89c5c69de0dcfaaa'
          'd41c61c7034ca7d48433a4798f3ace64'
          '9f145dcdf463c9e0f3178fe5ff697d62')
 
-build() {
-
-}
 
 package() {
   mkdir -p ${pkgdir}/etc/z-way

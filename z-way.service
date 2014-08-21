@@ -1,0 +1,12 @@
+[Unit]
+Description=RaZberry Z-Way server
+After=network.target
+
+[Service]
+Type=forking
+User=nobody
+ExecStart=cd /opt/z-way-server && ./z-way-server
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,44 @@
+post_install() {
+  echo "Please read Z-Wave.Me licence agreement on Z-Wave.Me web site: http://razberry.z-wave.me/docs/ZWAYEULA.pdf"
+}
+pre_upgrade() {
+  INSTALL_DIR=/opt
+  ZWAY_DIR=$INSTALL_DIR/z-way-server
+  echo "TMP_ZWAY_DIR=${ZWAY_DIR}_$(date "+%Y-%m-%d-%H-%M-%S")"
+  echo "Making backup of previous version of Z-Way in $TMP_ZWAY_DIR"
+  mv $ZWAY_DIR $TMP_ZWAY_DIR
+}
+post_upgrade() {
+  INSTALL_DIR=/opt
+  ZWAY_DIR=$INSTALL_DIR/z-way-server
+  echo "Copying settings"
+  cp $TMP_ZWAY_DIR/config/Configuration.xml $ZWAY_DIR/config/
+  cp $TMP_ZWAY_DIR/config/Rules.xml $ZWAY_DIR/config/
+  cp -R $TMP_ZWAY_DIR/config/maps $ZWAY_DIR/config/
+  cp -R $TMP_ZWAY_DIR/config/zddx $ZWAY_DIR/config
+  if [ -e $TMP_ZWAY_DIR/automation/.syscommand ]
+  then
+    cp $TMP_ZWAY_DIR/automation/.syscommand $ZWAY_DIR/automation/.syscommand
+  fi
+  
+  if [ -d $TMP_ZWAY_DIR/automation/storage ]
+  then
+    rm -Rf $ZWAY_DIR/automation/storage
+    cp -R $TMP_ZWAY_DIR/automation/storage $ZWAY_DIR/automation/
+  fi
+  
+  if [ -d $TMP_ZWAY_DIR/automation/userModules ]
+  then
+    rm -Rf $ZWAY_DIR/automation/userModules
+    cp -R $TMP_ZWAY_DIR/automation/userModules $ZWAY_DIR/automation/
+  fi
+  
+  if ! diff $ZWAY_DIR/config.xml $TMP_ZWAY_DIR/config.xml -w > /dev/null
+  then
+    echo "config.xml replaced by the new one - make sure to restore your changes"
+    echo "diff $ZWAY_DIR/config.xml $TMP_ZWAY_DIR/config.xml:"
+    diff $ZWAY_DIR/config.xml $TMP_ZWAY_DIR/config.xml -w
+    echo
+  fi
+  echo "!!! Defaults.xml and config.xml updated with new versions !!!"
+}

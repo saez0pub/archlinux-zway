@@ -11,10 +11,11 @@ depends=('v8','libarchive','libxml2','openssl','yajl','curl','zlib','sharutils',
 install=${pkgname}.install
 source=("http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v1.7.2.tgz"
         "http://razberry.z-wave.me/webif_raspberry.tar.gz","z-way.service","z-way-server.logrotate")
-md5sums=('195960e048bfa77badc2a3df382a5a88'
-         'a2a8a3ee7018d5681403088dcd3d2c2e'
-         '9419012794e5e134bc152cfd388d63e7'
-         '3be05b06c7a6e269d9a4c74dcf239d19')
+
+md5sums=('cf19954c94271ea0206fe1b28120262e'
+         'e930662d01287a9f89c5c69de0dcfaaa'
+         'd41c61c7034ca7d48433a4798f3ace64'
+         '9f145dcdf463c9e0f3178fe5ff697d62')
 
 build() {
 

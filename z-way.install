@@ -1,19 +1,37 @@
 post_install() {
   echo "Please read Z-Wave.Me licence agreement on Z-Wave.Me web site: http://razberry.z-wave.me/docs/ZWAYEULA.pdf"
   # Prepare AMA0
-  sed 's/console=ttyAMA0,115200//; s/kgdboc=ttyAMA0,115200//' /boot/cmdline.txt > /tmp/zway_install_cmdline.txt
-  sed 's|[^:]*:[^:]*:respawn:/sbin/getty[^:]*ttyAMA0[^:]*||' /etc/inittab > /tmp/zway_install_inittab
-  if diff /boot/cmdline.txt /tmp/zway_install_cmdline.txt > /dev/null || diff /etc/inittab /tmp/zway_install_inittab > 
-  /dev/null
+  if [ -f /boot/cmdline.txt ] 
   then
+    sed 's/console=ttyAMA0,115200//; s/kgdboc=ttyAMA0,115200//' /boot/cmdline.txt > /tmp/zway_install_cmdline.txt
+    diffBoot=$(diff /boot/cmdline.txt /tmp/zway_install_cmdline.txt > /dev/null | wc -l)
+  else
+   diffBoot=0
+  fi
+  if [ -f /etc/inittab ]
+  then
+    sed 's|[^:]*:[^:]*:respawn:/sbin/getty[^:]*ttyAMA0[^:]*||' /etc/inittab > /tmp/zway_install_inittab
+    diffInittab=$(diff diff /etc/inittab /tmp/zway_install_inittab)
+  else
+    diffInittab=0
+  fi
+  if [ $diffBoot -eq 0 -a  $diffInittab -eq 0 ]
+  then
+    echo "AMA0 interface already configured."
     rm /tmp/zway_install_cmdline.txt /tmp/zway_install_inittab
   else
-    echo "Preparing AMA0 interface:"
-    echo " removing 'console=ttyAMA0,115200' and 'kgdboc=ttyAMA0,115200' from kernel command line (/boot/cmdline.
+    if [ $diffBoot -ge 0 ]
+    then
+      echo "Preparing AMA0 interface:"
+      echo " removing 'console=ttyAMA0,115200' and 'kgdboc=ttyAMA0,115200' from kernel command line (/boot/cmdline.
   txt)"
-    mv /tmp/zway_install_cmdline.txt /boot/cmdline.txt
-    echo " removing '*:*:respawn:/sbin/getty ttyAMA0' from /etc/inittab"
-    mv /tmp/zway_install_inittab /etc/inittab
+      mv /tmp/zway_install_cmdline.txt /boot/cmdline.txt
+    fi
+    if [ $diffInittab -ge 0 ]
+    then
+      echo " removing '*:*:respawn:/sbin/getty ttyAMA0' from /etc/inittab"
+      mv /tmp/zway_install_inittab /etc/inittab
+    fi
     echo "AMA0 interface reconfigured, please restart Raspberry"
   fi
 
@@ -23,7 +41,7 @@ post_install() {
 }
 pre_upgrade() {
   echo "Please read Z-Wave.Me licence agreement on Z-Wave.Me web site: http://razberry.z-wave.me/docs/ZWAYEULA.pdf"
-  exho stopping services
+  echo stopping services
   systemctl stop z-way-server
   systemctl stop mongoose
   INSTALL_DIR=/opt

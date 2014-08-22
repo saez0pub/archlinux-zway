@@ -11,7 +11,7 @@ depends=('v8' 'libarchive' 'libxml2' 'openssl' 'yajl' 'curl'
          'zlib' 'sharutils' 'logrotate')
 install=${pkgname}.install
 source=("http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v1.7.2.tgz"
-        "http://razberry.z-wave.me/webif_raspberry.tar.gz" "z-way.service" "z-way-server.logrotate")
+        "http://razberry.z-wave.me/webif_raspberry.tar.gz" "z-way-server.service" "z-way-server.logrotate")
 
 md5sums=('cf19954c94271ea0206fe1b28120262e'
          'e930662d01287a9f89c5c69de0dcfaaa'
@@ -28,7 +28,7 @@ package() {
 
   tar -zxf z-way-server-RaspberryPiXTools-v${pkgver}.tgz
   mv z-way-server ${pkgdir}/opt/
-  install -D -m644 ${srcdir}/z-way-server ${pkgdir}/usr/lib/systemd/system/z-way-server.sevice
+  install -D -m644 ${srcdir}/z-way-server.service ${pkgdir}/usr/lib/systemd/system/z-way-server.sevice
   install -D -m644 ${srcdir}/z-way-server.logrotate ${pkgdir}/etc/logrotate.d/z-way-server
   tar -zxf http://razberry.z-wave.me/webif_raspberry.tar.gz -C ${pkgdir}/
 }

@@ -1,4 +1,5 @@
 pkg/*
 src/*
 webif_raspberry.tar.gz
-z-way-server-RaspberryPiXTools-v1.7.2.tgz
+z-way-server-RaspberryPiXTools-v*.tgz
+z-way-*-armv6h.pkg.tar.xz

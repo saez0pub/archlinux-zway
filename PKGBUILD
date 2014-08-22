@@ -30,5 +30,5 @@ package() {
   mv z-way-server ${pkgdir}/opt/
   install -D -m644 ${srcdir}/z-way-server.service ${pkgdir}/usr/lib/systemd/system/z-way-server.sevice
   install -D -m644 ${srcdir}/z-way-server.logrotate ${pkgdir}/etc/logrotate.d/z-way-server
-  tar -zxf http://razberry.z-wave.me/webif_raspberry.tar.gz -C ${pkgdir}/
+  tar -zxf webif_raspberry.tar.gz -C ${pkgdir}/
 }

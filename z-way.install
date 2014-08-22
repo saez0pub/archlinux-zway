@@ -1,7 +1,31 @@
 post_install() {
   echo "Please read Z-Wave.Me licence agreement on Z-Wave.Me web site: http://razberry.z-wave.me/docs/ZWAYEULA.pdf"
+  # Prepare AMA0
+  sed 's/console=ttyAMA0,115200//; s/kgdboc=ttyAMA0,115200//' /boot/cmdline.txt > /tmp/zway_install_cmdline.txt
+  sed 's|[^:]*:[^:]*:respawn:/sbin/getty[^:]*ttyAMA0[^:]*||' /etc/inittab > /tmp/zway_install_inittab
+  if diff /boot/cmdline.txt /tmp/zway_install_cmdline.txt > /dev/null || diff /etc/inittab /tmp/zway_install_inittab > 
+  /dev/null
+  then
+    rm /tmp/zway_install_cmdline.txt /tmp/zway_install_inittab
+  else
+    echo "Preparing AMA0 interface:"
+    echo " removing 'console=ttyAMA0,115200' and 'kgdboc=ttyAMA0,115200' from kernel command line (/boot/cmdline.
+  txt)"
+    mv /tmp/zway_install_cmdline.txt /boot/cmdline.txt
+    echo " removing '*:*:respawn:/sbin/getty ttyAMA0' from /etc/inittab"
+    mv /tmp/zway_install_inittab /etc/inittab
+    echo "AMA0 interface reconfigured, please restart Raspberry"
+  fi
+
+  echo "In order to make Z-Way working on startup :
+  systemctl enable z-way-server
+  systemctl enable mongoose"
 }
 pre_upgrade() {
+  echo "Please read Z-Wave.Me licence agreement on Z-Wave.Me web site: http://razberry.z-wave.me/docs/ZWAYEULA.pdf"
+  exho stopping services
+  systemctl stop z-way-server
+  systemctl stop mongoose
   INSTALL_DIR=/opt
   ZWAY_DIR=$INSTALL_DIR/z-way-server
   echo "TMP_ZWAY_DIR=${ZWAY_DIR}_$(date "+%Y-%m-%d-%H-%M-%S")"
@@ -41,4 +65,9 @@ post_upgrade() {
     echo
   fi
   echo "!!! Defaults.xml and config.xml updated with new versions !!!"
+  # Transform old DevicesData.xml to new format
+  (cd $ZWAY_DIR && test -x ./z-cfg-update && ls -1 config/zddx/*.xml | LD_LIBRARY_PATH=./libs xargs -l ./z-cfg-update)
+  echo "/!\ Services are stopped. If you want to start services :
+  systemctl start z-way-server
+  systemctl start mongoose"
 }

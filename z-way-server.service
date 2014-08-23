@@ -1,5 +1,6 @@
 [Unit]
 Description=RaZberry Z-Way server
+Requires=mongoose.service
 
 [Service]
 User=nobody
@@ -8,3 +9,6 @@ Environment="LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/z-way-server/libs"
 ExecStart=/opt/z-way-server/z-way-server
 KillMode=process
 Restart=always
+
+[Install]
+WantedBy=multi-user.target

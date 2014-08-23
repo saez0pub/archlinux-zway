@@ -15,7 +15,7 @@ source=("http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v
 
 md5sums=('cf19954c94271ea0206fe1b28120262e'
          'e930662d01287a9f89c5c69de0dcfaaa'
-         'd41c61c7034ca7d48433a4798f3ace64'
+         '9c89b5d0e0a11d10d15a4e53be969d89'
          '9f145dcdf463c9e0f3178fe5ff697d62')
 
 
@@ -31,4 +31,7 @@ package() {
   install -D -m644 ${srcdir}/z-way-server.service ${pkgdir}/usr/lib/systemd/system/z-way-server.service
   install -D -m644 ${srcdir}/z-way-server.logrotate ${pkgdir}/etc/logrotate.d/z-way-server
   tar -zxf webif_raspberry.tar.gz -C ${pkgdir}/
+
+  #z-way-server compiled with libarchive.so.12
+  ln -s /usr/lib/libarchive.so ${pkgdir}/opt/z-way-server/libs/libarchive.so.12
 }

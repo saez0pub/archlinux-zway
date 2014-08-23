@@ -18,7 +18,8 @@ post_install() {
   if [ $diffBoot -eq 0 -a  $diffInittab -eq 0 ]
   then
     echo "AMA0 interface already configured."
-    rm /tmp/zway_install_cmdline.txt /tmp/zway_install_inittab
+    [[ -f /tmp/zway_install_cmdline.txt ]] && rm /tmp/zway_install_cmdline.txt
+    [[ -f /tmp/zway_install_inittab ]] && rm /tmp/zway_install_inittab
   else
     if [ $diffBoot -gt 0 ]
     then

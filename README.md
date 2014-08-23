@@ -10,4 +10,5 @@ sudo pacman -U ./z-way-server-RaspberryPiXTools-v1.7.2.tgz
 
 ## How to run ##
 systemctl start z-way-server
+
 open the http://IP:8083 interface with IP as the IP address of the rasbperry pi

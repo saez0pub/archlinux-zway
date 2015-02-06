@@ -47,7 +47,8 @@ pre_upgrade() {
   systemctl stop mongoose
   INSTALL_DIR=/opt
   ZWAY_DIR=$INSTALL_DIR/z-way-server
-  echo "TMP_ZWAY_DIR=${ZWAY_DIR}_$(date "+%Y-%m-%d-%H-%M-%S")"
+  TMP_ZWAY_DIR=${ZWAY_DIR}_$(date "+%Y-%m-%d-%H-%M-%S")
+  echo "TMP_ZWAY_DIR=${TMP_ZWAY_DIR}"
   echo "Making backup of previous version of Z-Way in $TMP_ZWAY_DIR"
   mv $ZWAY_DIR $TMP_ZWAY_DIR
 }
@@ -55,10 +56,10 @@ post_upgrade() {
   INSTALL_DIR=/opt
   ZWAY_DIR=$INSTALL_DIR/z-way-server
   echo "Copying settings"
-  cp $TMP_ZWAY_DIR/config/Configuration.xml $ZWAY_DIR/config/
-  cp $TMP_ZWAY_DIR/config/Rules.xml $ZWAY_DIR/config/
-  cp -R $TMP_ZWAY_DIR/config/maps $ZWAY_DIR/config/
-  cp -R $TMP_ZWAY_DIR/config/zddx $ZWAY_DIR/config
+  [ -f $TMP_ZWAY_DIR/config/Configuration.xml ] && cp $TMP_ZWAY_DIR/config/Configuration.xml $ZWAY_DIR/config/
+  [ -f $TMP_ZWAY_DIR/config/Rules.xml ] && cp $TMP_ZWAY_DIR/config/Rules.xml $ZWAY_DIR/config/
+  [ -d $TMP_ZWAY_DIR/config/maps ] && cp -R $TMP_ZWAY_DIR/config/maps $ZWAY_DIR/config/
+  [ -d $TMP_ZWAY_DIR/config/zddx ] && cp -R $TMP_ZWAY_DIR/config/zddx $ZWAY_DIR/config
   if [ -e $TMP_ZWAY_DIR/automation/.syscommand ]
   then
     cp $TMP_ZWAY_DIR/automation/.syscommand $ZWAY_DIR/automation/.syscommand
@@ -85,7 +86,7 @@ post_upgrade() {
   fi
   echo "!!! Defaults.xml and config.xml updated with new versions !!!"
   # Transform old DevicesData.xml to new format
-  (cd $ZWAY_DIR && test -x ./z-cfg-update && ls -1 config/zddx/*.xml | LD_LIBRARY_PATH=./libs xargs -l ./z-cfg-update)
+  [ -e config/zddx/*.xml ] && (cd $ZWAY_DIR && test -x ./z-cfg-update && ls -1 config/zddx/*.xml | LD_LIBRARY_PATH=./libs xargs -l ./z-cfg-update)
   echo "/!\ Services are stopped. If you want to start services :
   systemctl start z-way-server"
 }

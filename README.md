@@ -1,11 +1,13 @@
 ## Installation ##
 ```
+yaourt -Sy mongoose v8 libxml2 sharutils
+*Edit mongoose' PKGBUILD and add armv6h in the archs
 mkdir /tmp/z-way
 cd /tmp/z-way/
 git clone git@github.com:saez0pub/archlinux-zway.git
 cd archlinux-zway/
 makepkg
-sudo pacman -U ./z-way-1.7.2-1-armv6h.pkg.tar.xz
+sudo pacman -U ./z-way-*-armv6h.pkg.tar.xz
 ```
 
 ## How to run ##

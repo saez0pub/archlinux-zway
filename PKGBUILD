@@ -1,7 +1,7 @@
 # Maintainer: saez0pub saez_pub hotmail com
 
 pkgname=z-way
-pkgver=1.7.2
+pkgver=2.0.0
 pkgrel=1
 pkgdesc="Z-Way communication stack"
 arch=('armv6h')
@@ -10,10 +10,10 @@ license=('http://razberry.z-wave.me/docs/ZWAYEULA.pdf')
 depends=('v8' 'libarchive' 'libxml2' 'openssl' 'yajl' 'curl'
          'zlib' 'sharutils' 'logrotate')
 install=${pkgname}.install
-source=("http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v1.7.2.tgz"
+source=("http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v2.0.0.tgz"
         "http://razberry.z-wave.me/webif_raspberry.tar.gz" "z-way-server.service" "z-way-server.logrotate")
 
-md5sums=('cf19954c94271ea0206fe1b28120262e'
+md5sums=('5af9f5cf19e6ed5659a7883b5ce8010f'
          'e930662d01287a9f89c5c69de0dcfaaa'
          '5128c042d184f5b59009123cb577f9d6'
          '9f145dcdf463c9e0f3178fe5ff697d62')
@@ -21,8 +21,8 @@ md5sums=('cf19954c94271ea0206fe1b28120262e'
 
 package() {
   mkdir -p ${pkgdir}/etc/z-way
-  mkdir -p ${pkgdir}/opt
-  echo "${pkgver}" > ${pkgdir}/etc/z-way/VERSION
+  mkdir ${pkgdir}/opt
+  echo "v${pkgver}" > ${pkgdir}/etc/z-way/VERSION
   echo "razberry" > ${pkgdir}/etc/z-way/box_type
   
 

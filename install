@@ -4,10 +4,19 @@
 INSTALL_DIR=/opt
 ZWAY_DIR=$INSTALL_DIR/z-way-server
 TEMP_DIR=/tmp
+if [[ -z "$ZWAY_UPIF" ]]; then
+	UPGRADING=$TEMP_DIR/z-way_upgrading_progress
+else
+	UPGRADING=$ZWAY_UPIF
+fi
 BOXED=`[ -e /etc/z-way/box_type ] && echo yes`
 
+##### The percentage of updates #####
+echo -e "10%\nStarting upgrading" > $UPGRADING
+#####################################
+
 # Check for root priviledges
-if [ $(id -u) != 0 ]
+if [[ $(id -u) != 0 ]]
 then
 	echo "Superuser (root) priviledges are required to install Z-Way"
 	echo "Please do 'sudo -s' first"
@@ -15,7 +24,7 @@ then
 fi
 
 # Accept EULA
-if [ "$BOXED" != "yes" ]
+if [[ "$BOXED" != "yes" ]]
 then
 	echo "Do you accept Z-Wave.Me licence agreement?"
 	echo "Please read it on Z-Wave.Me web site: http://razberry.z-wave.me/docs/ZWAYEULA.pdf"
@@ -37,67 +46,92 @@ fi
 
 # Check if Z-Way was already installed in /opt/z-way-server
 upgrade_zway="no"
-if [ -d $ZWAY_DIR ]; then
+if [[ -d $ZWAY_DIR ]]; then
 	upgrade_zway="yes"
 else
 	echo "z-way-server new installation"
 fi
 
+##### The percentage of updates #####
+echo -e "20%\nRemoving MathKernel" > $UPGRADING
+#####################################
+
 echo "Removing MathKernel"
 # In raspbian 2014-01-07 in init.d script error, it does not allow add new scripts to the startup
 apt-get -y remove wolfram-engine
 
-echo "Installing additional libraries"
-apt-get -qy install libyajl2 sharutils
+##### The percentage of updates #####
+echo -e "30%\nInstalling additional libraries" > $UPGRADING
+#####################################
 
-if [ ! -e /usr/lib/arm-linux-gnueabihf/libssl.so ]
+echo "Installing additional libraries"
+apt-get -y update
+apt-get -qy install sharutils
+echo "Installing additional libraries for HomeKit"
+apt-get -qy install libavahi-compat-libdnssd-dev
+
+if [[ ! -e /usr/lib/arm-linux-gnueabihf/libssl.so ]]
 	then
 	echo "Making symlinks to libssl.so"
 	cd /usr/lib/arm-linux-gnueabihf/
 	ln -s libssl.so.1.0.0 libssl.so
 fi
 
-if [ ! -e /usr/lib/arm-linux-gnueabihf/libcrypto.so ]
+if [[ ! -e /usr/lib/arm-linux-gnueabihf/libcrypto.so ]]
 	then
 	echo "Making symlinks to libcrypto.so"
 	cd /usr/lib/arm-linux-gnueabihf/
 	ln -s libcrypto.so.1.0.0 libcrypto.so
 fi
 
-echo "Getting Z-Way for Raspberry Pi"
-cd $TEMP_DIR
-wget http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v1.7.2.tgz -O - | tar -zx
+##### The percentage of updates #####
+echo -e "40%\nGetting Z-Way for Raspberry Pi" > $UPGRADING
+#####################################
+
+FILE=`basename z-way-server/z-way-server-RaspberryPiXTools-v2.0.0.tgz`
+if [[ -e $TEMP_DIR/$FILE ]]; then
+	echo "Removing duplicate of z-way installer"
+	rm -rf $TEMP_DIR/$FILE
+fi
+echo "Getting Z-Way for Raspberry Pi and installing"
+wget -4 http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v2.0.0.tgz -P $TEMP_DIR/
+
+##### The percentage of updates #####
+echo -e "50%\nExtracting new z-way-server" > $UPGRADING
+#####################################
+
+# remove z-way-server if exist
+rm -rf $TEMP_DIR/z-way-server
+# Extracting z-way-server
+echo "Extracting new z-way-server"
+tar -zxf $TEMP_DIR/$FILE -C $TEMP_DIR
+
+##### The percentage of updates #####
+echo -e "60%\nMaking backup and installing Z-Way" > $UPGRADING
+#####################################
 
 # If downloading and extracting is ok, then make backup and move z-way-server from /tmp to /data
-if [ "$?" -eq "0" ]; then
+if [[ "$?" -eq "0" ]]; then
 	# if need upgrade
-	if [ "$upgrade_zway" = "yes" ]; then
+	if [[ "$upgrade_zway" = "yes" ]]; then
 		echo "Previous z-way-server installation found"
 
 		# Stopping z-way-server
-		if [ -e /etc/init.d/z-way-server ]
+		if [[ -e /etc/init.d/z-way-server ]]
 		then
 			/etc/init.d/z-way-server stop
 		fi
 
-		if [ -e /etc/init.d/Z-Way ]
+		if [[ -e /etc/init.d/Z-Way ]]
 		then
 			/etc/init.d/Z-Way stop
 			rm /etc/init.d/Z-Way
-		fi
-
-		# Stopping mongoose
-		if [ -e /etc/init.d/mongoose ]
-		then
-			echo "Stopping mongoose http server"
-			/etc/init.d/mongoose stop
 		fi
 
 		# Make backup
 		TMP_ZWAY_DIR=${ZWAY_DIR}_$(date "+%Y-%m-%d-%H-%M-%S")
 		echo "Making backup of previous version of Z-Way in $TMP_ZWAY_DIR"
 		mv $ZWAY_DIR $TMP_ZWAY_DIR
-
 		mv $TEMP_DIR/z-way-server $INSTALL_DIR/
 
 		# Copy old configuration files to the new location
@@ -107,18 +141,18 @@ if [ "$?" -eq "0" ]; then
 		cp -R $TMP_ZWAY_DIR/config/maps $ZWAY_DIR/config/
 		cp -R $TMP_ZWAY_DIR/config/zddx $ZWAY_DIR/config/
 
-		if [ -e $TMP_ZWAY_DIR/automation/.syscommand ]
+		if [[ -e $TMP_ZWAY_DIR/automation/.syscommand ]]
 			then
 			cp $TMP_ZWAY_DIR/automation/.syscommand $ZWAY_DIR/automation/.syscommand
 		fi
 		
-		if [ -d $TMP_ZWAY_DIR/automation/storage ]
+		if [[ -d $TMP_ZWAY_DIR/automation/storage ]]
 			then
 			rm -Rf $ZWAY_DIR/automation/storage
 			cp -R $TMP_ZWAY_DIR/automation/storage $ZWAY_DIR/automation/
 		fi
 
-		if [ -d $TMP_ZWAY_DIR/automation/userModules ]
+		if [[ -d $TMP_ZWAY_DIR/automation/userModules ]]
 			then
 			rm -Rf $ZWAY_DIR/automation/userModules
 			cp -R $TMP_ZWAY_DIR/automation/userModules $ZWAY_DIR/automation/
@@ -137,13 +171,15 @@ if [ "$?" -eq "0" ]; then
 		echo "New version z-way-server installed"
 	fi
 else
-	echo "Downloading and extracting z-way-server failded"
+	echo -e "30%\nDownloading and extracting z-way-server failed" > $UPGRADING
+
+	echo "Downloading and extracting z-way-server failed"
 	echo "Exiting"
 	exit 1
 fi
 
 mkdir -p /etc/z-way
-echo "v1.7.2" > /etc/z-way/VERSION
+echo "v2.0.0" > /etc/z-way/VERSION
 echo "razberry" > /etc/z-way/box_type
 
 # Create Z-Way startup script
@@ -219,8 +255,13 @@ echo '/var/log/z-way-server.log {
 echo "Adding z-way-server to autostart"
 update-rc.d z-way-server defaults
 
-# Install Webif
-wget http://razberry.z-wave.me/webif_raspberry.tar.gz -O - | tar -zx -C /
+##### The percentage of updates #####
+echo -e "70%\nGetting Webif for Raspberry Pi and installing" > $UPGRADING
+#####################################
+
+# Getting Webif and installing
+echo "Getting Webif for Raspberry Pi and installing"
+wget -4 http://razberry.z-wave.me/webif_raspberry.tar.gz -O - | tar -zx -C /
 
 # If first install, get new ID
 if [[ ! -e /etc/init.d/zbw_connect ]]
@@ -259,7 +300,7 @@ case "$1" in
 	    exec /tmp/zbw_autosetup
 	fi
 
-        if wget http://find.zwave.me/zbw_new_user -O /tmp/zbw_connect_setup.run; then
+        if wget -4 http://find.zwave.me/zbw_new_user -O /tmp/zbw_connect_setup.run; then
             sleep 10
 	    if bash /tmp/zbw_connect_setup.run; then
 	        /etc/init.d/zbw_connect start
@@ -365,16 +406,38 @@ U0VSQCRTRVJWRVIKICAgIHNsZWVwIDEKZG9uZQoKZXhpdCAwCg==
 	./zbw_connect start
 fi
 
-# Stop mongoose
-/etc/init.d/mongoose stop
+##### The percentage of updates #####
+echo -e "80%\nGetting webserver mongoose for Webif" > $UPGRADING
+#####################################
 
-# Install webserver mongoose 
-wget http://razberry.z-wave.me/mongoose.pkg.rPi.tgz -O - | tar -zx -C /
+# Getting webserver mongoose for webif
+cd $TEMP_DIR
+if [[ -e mongoose.pkg.rPi.tgz ]]; then
+	echo "Removing duplicate of mongoose"
+	rm -rf mongoose.pkg.rPi.tgz
+fi
+echo "Getting webserver mongoose for Webif"
+wget -4 http://razberry.z-wave.me/mongoose.pkg.rPi.tgz -P $TEMP_DIR
 
-# Add to autostart and start webserver mongoose
+##### The percentage of updates #####
+echo -e "90%\nRestarting Webif and Z-Way" > $UPGRADING
+#####################################
+
+# Stopping mongoose
+if [[ -e /etc/init.d/mongoose ]]
+then
+	echo "Stopping mongoose http server"
+	/etc/init.d/mongoose stop
+fi
+
+# Installing webserver mongoose for webif
+tar -zxf $TEMP_DIR/mongoose.pkg.rPi.tgz -C /
+
+# Adding webserver to autostart 
 echo "Adding mongoose to autostart"
 update-rc.d mongoose defaults
 
+# Starting webserver mongoose
 echo "Start mongoose http server"
 /etc/init.d/mongoose start
 
@@ -388,6 +451,7 @@ sed 's|[^:]*:[^:]*:respawn:/sbin/getty[^:]*ttyAMA0[^:]*||' /etc/inittab > /tmp/z
 if diff /boot/cmdline.txt /tmp/zway_install_cmdline.txt > /dev/null || diff /etc/inittab /tmp/zway_install_inittab > /dev/null
 then
 	rm /tmp/zway_install_cmdline.txt /tmp/zway_install_inittab
+	# Starting z-way-server mongoose
 	echo "Starting z-way-server"
 	/etc/init.d/z-way-server start	
 else
@@ -403,7 +467,7 @@ fi
 sync
 	
 # Subscribe user to news
-if [ "$BOXED" != "yes" ]
+if [[ "$BOXED" != "yes" ]]
 then
 	echo "Do you want to receive emails with news about RaZberry project?"
 	echo "! Please subscribe again if you did it before 30.03.2013"
@@ -427,3 +491,5 @@ then
 fi
 
 echo "Thank you for using RaZberry!"
+
+exit 0

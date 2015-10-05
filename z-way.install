@@ -33,7 +33,7 @@ post_install() {
       echo " removing '*:*:respawn:/sbin/getty ttyAMA0' from /etc/inittab"
       mv /tmp/zway_install_inittab /etc/inittab
     fi
-    echo "AMA0 interface reconfigured, please restart Raspberry"
+    echo "AMA0 interface reconfigured, please restart Rasbperry"
   fi
 
 

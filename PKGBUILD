@@ -1,7 +1,7 @@
 # Maintainer: saez0pub saez_pub hotmail com
 
 pkgname=z-way
-pkgver=2.0.0
+pkgver=2.1.1
 pkgrel=1
 pkgdesc="Z-Way communication stack"
 arch=('armv6h' 'armv7h')
@@ -10,11 +10,11 @@ license=('http://razberry.z-wave.me/docs/ZWAYEULA.pdf')
 depends=('v8' 'libarchive' 'libxml2' 'openssl' 'yajl' 'curl'
          'zlib' 'sharutils' 'logrotate')
 install=${pkgname}.install
-source=("http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v2.0.0.tgz"
+source=("http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v${pkgver}.tgz"
         "http://razberry.z-wave.me/webif_raspberry.tar.gz" "z-way-server.service" "z-way-server.logrotate")
 
-md5sums=('5af9f5cf19e6ed5659a7883b5ce8010f'
-         'e930662d01287a9f89c5c69de0dcfaaa'
+md5sums=('ec0e4ecd60d415e7e01e5c8fc9ff37e2'
+         '8d8847b55fc980a8e53f9fbe31dfac41'
          '5128c042d184f5b59009123cb577f9d6'
          '9f145dcdf463c9e0f3178fe5ff697d62')
 
@@ -26,8 +26,7 @@ package() {
   echo "razberry" > ${pkgdir}/etc/z-way/box_type
   
 
-  tar -zxf z-way-server-RaspberryPiXTools-v${pkgver}.tgz
-  mv z-way-server ${pkgdir}/opt/
+  mv ${srcdir}/z-way-server ${pkgdir}/opt/
   install -D -m644 ${srcdir}/z-way-server.service ${pkgdir}/usr/lib/systemd/system/z-way-server.service
   install -D -m644 ${srcdir}/z-way-server.logrotate ${pkgdir}/etc/logrotate.d/z-way-server
   tar -zxf webif_raspberry.tar.gz -C ${pkgdir}/

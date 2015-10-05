@@ -4,15 +4,20 @@
 INSTALL_DIR=/opt
 ZWAY_DIR=$INSTALL_DIR/z-way-server
 TEMP_DIR=/tmp
-if [[ -z "$ZWAY_UPIF" ]]; then
-	UPGRADING=$TEMP_DIR/z-way_upgrading_progress
-else
-	UPGRADING=$ZWAY_UPIF
-fi
 BOXED=`[ -e /etc/z-way/box_type ] && echo yes`
 
+if [[ $ZWAY_UPIF ]]; then
+    write_upi() {
+	echo -e $1 > $ZWAY_UPIF
+    }
+else
+    write_upi() {
+	true;
+    }
+fi
+
 ##### The percentage of updates #####
-echo -e "10%\nStarting upgrading" > $UPGRADING
+write_upi "10%\nStarting upgrading"
 #####################################
 
 # Check for root priviledges
@@ -53,7 +58,7 @@ else
 fi
 
 ##### The percentage of updates #####
-echo -e "20%\nRemoving MathKernel" > $UPGRADING
+write_upi "20%\nRemoving MathKernel"
 #####################################
 
 echo "Removing MathKernel"
@@ -61,12 +66,12 @@ echo "Removing MathKernel"
 apt-get -y remove wolfram-engine
 
 ##### The percentage of updates #####
-echo -e "30%\nInstalling additional libraries" > $UPGRADING
+write_upi "30%\nInstalling additional libraries"
 #####################################
 
 echo "Installing additional libraries"
 apt-get -y update
-apt-get -qy install sharutils
+apt-get -qy install sharutils tzdata gawk
 echo "Installing additional libraries for HomeKit"
 apt-get -qy install libavahi-compat-libdnssd-dev
 
@@ -85,19 +90,19 @@ if [[ ! -e /usr/lib/arm-linux-gnueabihf/libcrypto.so ]]
 fi
 
 ##### The percentage of updates #####
-echo -e "40%\nGetting Z-Way for Raspberry Pi" > $UPGRADING
+write_upi "40%\nGetting Z-Way for Raspberry Pi"
 #####################################
 
-FILE=`basename z-way-server/z-way-server-RaspberryPiXTools-v2.0.0.tgz`
+FILE=`basename z-way-server/z-way-server-RaspberryPiXTools-v2.1.1.tgz`
 if [[ -e $TEMP_DIR/$FILE ]]; then
 	echo "Removing duplicate of z-way installer"
 	rm -rf $TEMP_DIR/$FILE
 fi
 echo "Getting Z-Way for Raspberry Pi and installing"
-wget -4 http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v2.0.0.tgz -P $TEMP_DIR/
+wget -4 http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v2.1.1.tgz -P $TEMP_DIR/
 
 ##### The percentage of updates #####
-echo -e "50%\nExtracting new z-way-server" > $UPGRADING
+write_upi "50%\nExtracting new z-way-server"
 #####################################
 
 # remove z-way-server if exist
@@ -107,7 +112,7 @@ echo "Extracting new z-way-server"
 tar -zxf $TEMP_DIR/$FILE -C $TEMP_DIR
 
 ##### The percentage of updates #####
-echo -e "60%\nMaking backup and installing Z-Way" > $UPGRADING
+write_upi "60%\nMaking backup and installing Z-Way"
 #####################################
 
 # If downloading and extracting is ok, then make backup and move z-way-server from /tmp to /data
@@ -171,7 +176,7 @@ if [[ "$?" -eq "0" ]]; then
 		echo "New version z-way-server installed"
 	fi
 else
-	echo -e "30%\nDownloading and extracting z-way-server failed" > $UPGRADING
+	write_upi "30%\nDownloading and extracting z-way-server failed"
 
 	echo "Downloading and extracting z-way-server failed"
 	echo "Exiting"
@@ -179,7 +184,7 @@ else
 fi
 
 mkdir -p /etc/z-way
-echo "v2.0.0" > /etc/z-way/VERSION
+echo "v2.1.1" > /etc/z-way/VERSION
 echo "razberry" > /etc/z-way/box_type
 
 # Create Z-Way startup script
@@ -256,7 +261,7 @@ echo "Adding z-way-server to autostart"
 update-rc.d z-way-server defaults
 
 ##### The percentage of updates #####
-echo -e "70%\nGetting Webif for Raspberry Pi and installing" > $UPGRADING
+write_upi "70%\nGetting Webif for Raspberry Pi and installing"
 #####################################
 
 # Getting Webif and installing
@@ -407,7 +412,7 @@ U0VSQCRTRVJWRVIKICAgIHNsZWVwIDEKZG9uZQoKZXhpdCAwCg==
 fi
 
 ##### The percentage of updates #####
-echo -e "80%\nGetting webserver mongoose for Webif" > $UPGRADING
+write_upi "80%\nGetting webserver mongoose for Webif"
 #####################################
 
 # Getting webserver mongoose for webif
@@ -420,7 +425,7 @@ echo "Getting webserver mongoose for Webif"
 wget -4 http://razberry.z-wave.me/mongoose.pkg.rPi.tgz -P $TEMP_DIR
 
 ##### The percentage of updates #####
-echo -e "90%\nRestarting Webif and Z-Way" > $UPGRADING
+write_upi "90%\nRestarting Webif and Z-Way"
 #####################################
 
 # Stopping mongoose
